@@ -1,4 +1,4 @@
-import 'package:classinterim/Chat/core/consts.dart';
+import 'package:classinterim/Chats/helper/consts.dart';
 import 'package:classinterim/Chat/models/chat_item_model.dart';
 import 'package:classinterim/Chat/models/chat_model.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +46,7 @@ class _ChatItemPageState extends State<ChatItemPage> {
         centerTitle: true,
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Expanded(
             child: ListView.builder(
@@ -69,7 +70,7 @@ class _ChatItemPageState extends State<ChatItemPage> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: ExactAssetImage(
-                                    "assets/default.jpg",
+                                    "",
                                   ),
                                 ),
                                 borderRadius: BorderRadius.all(
@@ -79,7 +80,7 @@ class _ChatItemPageState extends State<ChatItemPage> {
                             )
                           : Container(
                               width: 30,
-                              height: 30,
+                              height: 40,
                             ),
                       Container(
                         constraints: BoxConstraints(
@@ -122,29 +123,6 @@ class _ChatItemPageState extends State<ChatItemPage> {
               },
             ),
           ),
-          if (currentChat.isTyping)
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      SpinKitThreeBounce(
-                        color: AppColors.blueColor,
-                        size: 20.0,
-                      ),
-                    ],
-                  ),
-                  Text(
-                    "${currentChat.contact.name} is typing...",
-                    style: TextStyle(
-                      color: Colors.white38,
-                    ),
-                  )
-                ],
-              ),
-            ),
         ],
       ),
       bottomNavigationBar: _buildInput(),
@@ -172,6 +150,7 @@ class _ChatItemPageState extends State<ChatItemPage> {
                   color: Colors.white30,
                 ),
               ),
+              style: TextStyle(fontSize: 21, color: AppColors.blueColor),
             ),
           ),
           IconButton(

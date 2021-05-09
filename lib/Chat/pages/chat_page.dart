@@ -1,7 +1,8 @@
-import 'package:classinterim/Chat/core/consts.dart';
-import 'package:classinterim/Chat/core/flutter_icons.dart';
+import 'package:classinterim/Chats/helper/consts.dart';
 import 'package:classinterim/Chat/models/chat_model.dart';
 import 'package:classinterim/Chat/pages/chat_item_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -11,7 +12,47 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  TextEditingController searchusername = new TextEditingController();
   List<ChatModel> list = ChatModel.list;
+  QuerySnapshot searchsnapshot;
+
+  getUserbyUsername(String username) async {
+    FirebaseFirestore.instance
+        .collection('Users')
+        .where("Username", isEqualTo: username)
+        .get()
+        .then(
+      (QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          print(doc["Username"]);
+          print(doc["Email"]);
+          return searchsnapshot != null
+              ? ListView.builder(
+                  itemCount: searchsnapshot.documents.length,
+                  itemBuilder: (context, index) {
+                    return SearchTile(
+                      username: doc["Username"],
+                      email: doc["Email"],
+                    );
+                  })
+              : Container(
+                  child: Text('No'),
+                );
+        });
+        return Text("loading");
+      },
+    );
+  }
+
+  initiatesearch() {
+    getUserbyUsername(searchusername.text);
+  }
+
+  @override
+  void initState() {
+    initiatesearch();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +80,7 @@ class _ChatPageState extends State<ChatPage> {
       body: Column(
         children: <Widget>[
           Container(
-            margin: EdgeInsets.all(16),
+            margin: EdgeInsets.all(11),
             padding: EdgeInsets.all(6),
             decoration: BoxDecoration(
                 color: AppColors.darkColor,
@@ -48,15 +89,25 @@ class _ChatPageState extends State<ChatPage> {
                 )),
             child: TextField(
               decoration: InputDecoration(
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.white54,
-                ),
-                hintText: "Search",
-                hintStyle: TextStyle(
-                  color: Colors.white54,
-                ),
-              ),
+                  border: InputBorder.none,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.white54,
+                  ),
+                  hintText: "Search Username",
+                  hintStyle: TextStyle(color: Colors.white54, fontSize: 21),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.indigo,
+                      size: 25,
+                    ),
+                    onPressed: () {
+                      initiatesearch();
+                    },
+                  )),
+              controller: searchusername,
+              style: TextStyle(color: Colors.white54, fontSize: 23),
             ),
           ),
           Expanded(
@@ -89,32 +140,6 @@ class _ChatPageState extends State<ChatPage> {
                       color: Colors.white,
                     ),
                   ),
-                  subtitle: list[index].isTyping
-                      ? Row(
-                          children: <Widget>[
-                            SpinKitThreeBounce(
-                              color: AppColors.blueColor,
-                              size: 20.0,
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: <Widget>[
-                            Text(
-                              list[index].lastMessage,
-                              style: TextStyle(
-                                color: Colors.white54,
-                              ),
-                            ),
-                            SizedBox(width: 25),
-                            Text(
-                              list[index].lastMessageTime + " days ago",
-                              style: TextStyle(
-                                color: Colors.white54,
-                              ),
-                            ),
-                          ],
-                        ),
                 );
               },
             ),
@@ -127,6 +152,39 @@ class _ChatPageState extends State<ChatPage> {
           Icons.add,
         ),
         backgroundColor: AppColors.blueColor,
+      ),
+    );
+  }
+}
+
+class SearchTile extends StatelessWidget {
+  final String username;
+  final String email;
+
+  SearchTile({this.username, this.email});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(username),
+                subtitle: Text(email),
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.darkColor,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text('Message'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

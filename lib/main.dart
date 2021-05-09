@@ -1,18 +1,16 @@
 import 'dart:ui';
-
 import 'package:classinterim/Teachers/bottomNavigationbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Models/Data_Model.dart';
-import 'Students/Notice.dart';
+import 'Students/bottomNavigationbar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +25,7 @@ Future<void> main() async {
     home: username == null && role == null
         ? MyApp()
         : role == "Student"
-            ? Notice()
+            ? SBottomNavigation()
             : BottomNavigation(),
     debugShowCheckedModeBanner: false,
   ));
@@ -59,8 +57,6 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController username = new TextEditingController();
   TextEditingController email = new TextEditingController();
   TextEditingController password = new TextEditingController();
-
-  bool _isObscure = true;
 
   int _pageState = 0;
 
@@ -101,9 +97,8 @@ class _LoginPageState extends State<LoginPage> {
 
   double windowWidth = 0;
   double windowHeight = 0;
-
   bool _keyboardVisible = false;
-
+  bool _isObscure = true;
   @override
   void initState() {
     super.initState();
@@ -138,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
         _loginOpacity = 1;
 
         _loginYOffset = windowHeight;
-        _loginHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
+        //_loginHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
 
         _loginXOffset = 0;
         _registerYOffset = windowHeight;
@@ -152,8 +147,8 @@ class _LoginPageState extends State<LoginPage> {
         _loginWidth = windowWidth;
         _loginOpacity = 1;
 
-        _loginYOffset = _keyboardVisible ? 40 : 270;
-        _loginHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
+        _loginYOffset = _keyboardVisible ? 20 : 270;
+        //_loginHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
 
         _loginXOffset = 0;
         _registerYOffset = windowHeight;
@@ -169,14 +164,14 @@ class _LoginPageState extends State<LoginPage> {
         _loginOpacity = 0.7;
         _registerOpacity = 1;
 
-        _loginYOffset = _keyboardVisible ? 40 : 270;
-        _loginHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
+        _loginYOffset = _keyboardVisible ? 20 : 270;
+        //_loginHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
 
         _loginXOffset = 20;
         _registerXOffset = 0;
 
-        _registerYOffset = _keyboardVisible ? 55 : 270;
-        _registerHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
+        _registerYOffset = _keyboardVisible ? 20 : 270;
+        //_registerHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
 
         _statusYOffset = windowHeight;
         break;
@@ -193,18 +188,18 @@ class _LoginPageState extends State<LoginPage> {
         _registerOpacity = 0.7;
         _statusOpacity = 1;
 
-        _loginYOffset = _keyboardVisible ? 40 : 270;
-        _loginHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
+        _loginYOffset = _keyboardVisible ? 20 : 270;
+        //_loginHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
 
         _registerYOffset = _keyboardVisible ? 20 : 270;
-        _registerHeight = _keyboardVisible ? windowHeight : windowHeight - 250;
+        //_registerHeight = _keyboardVisible ? windowHeight : windowHeight - 250;
 
         _loginXOffset = 45;
         _registerXOffset = 20;
         _statusXOffset = 0;
 
-        _statusYOffset = _keyboardVisible ? 55 : 280;
-        _statusHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
+        _statusYOffset = _keyboardVisible ? 20 : 280;
+        //_statusHeight = _keyboardVisible ? windowHeight : windowHeight - 270;
 
         _departmentYOffset = windowHeight;
         break;
@@ -221,24 +216,25 @@ class _LoginPageState extends State<LoginPage> {
         _statusOpacity = 0.7;
         _departmentOpacity = 1;
 
-        _registerYOffset = _keyboardVisible ? 40 : 270;
-        _registerHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
+        _registerYOffset = _keyboardVisible ? 20 : 270;
+        //_registerHeight = _keyboardVisible ? windowHeight : windowHeight - 240;
 
         _statusYOffset = _keyboardVisible ? 20 : 270;
-        _statusHeight = _keyboardVisible ? windowHeight : windowHeight - 250;
+        //_statusHeight = _keyboardVisible ? windowHeight : windowHeight - 250;
 
         _loginXOffset = 45;
         _registerXOffset = 45;
         _statusXOffset = 20;
         _departmentXOffset = 0;
 
-        _departmentYOffset = _keyboardVisible ? 55 : 280;
-        _departmentHeight =
-            _keyboardVisible ? windowHeight : windowHeight - 270;
+        _departmentYOffset = _keyboardVisible ? 20 : 280;
+        //_departmentHeight =
+        _keyboardVisible ? windowHeight : windowHeight - 270;
         break;
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           AnimatedContainer(
@@ -334,6 +330,7 @@ class _LoginPageState extends State<LoginPage> {
                                       EdgeInsets.symmetric(vertical: 20),
                                   border: InputBorder.none,
                                   hintText: "Enter Username"),
+                              textInputAction: TextInputAction.next,
                             ),
                           ),
                         ],
@@ -360,7 +357,6 @@ class _LoginPageState extends State<LoginPage> {
                           Expanded(
                             child: TextField(
                               controller: password,
-                              obscureText: _isObscure,
                               decoration: InputDecoration(
                                   contentPadding:
                                       EdgeInsets.symmetric(vertical: 20),
@@ -378,6 +374,7 @@ class _LoginPageState extends State<LoginPage> {
                                           _isObscure = !_isObscure;
                                         });
                                       })),
+                              textInputAction: TextInputAction.done,
                             ),
                           ),
                         ],
@@ -430,7 +427,6 @@ class _LoginPageState extends State<LoginPage> {
 
                           if (documents.length > 0) {
                             preferences.setString("Username", username.text);
-                            //Fluttertoast.showToast(msg: "Login Successful");
                             final snackBar =
                                 SnackBar(content: Text("Login Successful"));
                             ScaffoldMessenger.of(context)
@@ -445,22 +441,20 @@ class _LoginPageState extends State<LoginPage> {
                                   "Department", depart.toString());
 
                               if (role == "Faculty") {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => BottomNavigation()),
                                 );
                               } else {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => Notice()));
+                                        builder: (context) =>
+                                            SBottomNavigation()));
                               }
                             });
                           } else {
-                            //Fluttertoast.showToast(
-                            //    msg: "Invalid Credentials",
-                            //   timeInSecForIosWeb: 2);
                             final snackBar =
                                 SnackBar(content: Text("Invalid Credentials"));
                             ScaffoldMessenger.of(context)
@@ -557,13 +551,13 @@ class _LoginPageState extends State<LoginPage> {
                               )),
                           Expanded(
                             child: TextField(
-                              controller: email,
-                              decoration: InputDecoration(
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 20),
-                                  border: InputBorder.none,
-                                  hintText: "Enter Email"),
-                            ),
+                                controller: email,
+                                decoration: InputDecoration(
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 20),
+                                    border: InputBorder.none,
+                                    hintText: "Enter Email"),
+                                textInputAction: TextInputAction.next),
                           ),
                         ],
                       ),
@@ -593,6 +587,7 @@ class _LoginPageState extends State<LoginPage> {
                                       EdgeInsets.symmetric(vertical: 20),
                                   border: InputBorder.none,
                                   hintText: "Enter Username"),
+                              textInputAction: TextInputAction.next,
                             ),
                           ),
                         ],
@@ -637,6 +632,7 @@ class _LoginPageState extends State<LoginPage> {
                                           _keyboardVisible = false;
                                         });
                                       })),
+                              textInputAction: TextInputAction.done,
                             ),
                           ),
                         ],
@@ -917,8 +913,10 @@ class _LoginPageState extends State<LoginPage> {
                           final List<DocumentSnapshot> documents =
                               result.documents;
                           if (documents.length > 0) {
-                            Fluttertoast.showToast(
-                                msg: "Username Already Exists!");
+                            final snackBar = SnackBar(
+                                content: Text("User Already Exists!!"));
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
                           } else {
                             Firestore.instance
                                 .collection('Users')
@@ -930,10 +928,12 @@ class _LoginPageState extends State<LoginPage> {
                               'Department': selecteddepartment.departments,
                               'Role': selectedUser.name
                             });
-                            Fluttertoast.showToast(
-                                msg: "Registered Successfully");
-                            _pageState = 1;
+                            final snackBar = SnackBar(
+                                content: Text("User Registered Successfully"));
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
                           }
+                          _pageState = 1;
                         });
                       },
                       child: Container(

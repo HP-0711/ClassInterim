@@ -1,39 +1,93 @@
-/*import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:classinterim/Chats/Chatmain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class BottomNavigation extends StatefulWidget {
-  @override
-  _bottomnavigation createState() => _bottomnavigation();
+import 'ProfilePage.dart';
+
+class SBottomNavigation extends StatefulWidget {
+  bottomnavigation createState() => bottomnavigation();
 }
 
-// ignore: camel_case_types
-class _bottomnavigation extends State<BottomNavigation> {
+class bottomnavigation extends State<SBottomNavigation> {
+  PageController _pageController;
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+  }
+
+  int _currentIndex = 0;
+  String username;
+  double windowWidth = 0;
+  double windowHeight = 0;
+
   @override
   Widget build(BuildContext context) {
+    windowHeight = MediaQuery.of(context).size.height;
+    windowWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.blueAccent,
-        items: <Widget>[
-          Icon(Icons.chat_bubble, size: 30),
-          Icon(Icons.notifications_none_outlined, size: 30),
-          Icon(Icons.supervised_user_circle, size: 30),
-        ],
-        onTap: (index) {
-          //Handle button tap
-          switch (index) {
-            case 0:
-              // Navigator.push(
-              //context, MaterialPageRoute(builder: (context) => ChatPage()));
-              break;
-            case 1:
-              break;
-            case 2:
-              break;
-          }
+      body: SizedBox.expand(
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() => _currentIndex = index);
+          },
+          children: <Widget>[
+            Container(
+              child: chatmain(),
+            ),
+            Container(),
+            Container(),
+            Container(
+              child: SProfilePage(),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavyBar(
+        selectedIndex: _currentIndex,
+        showElevation: true,
+        itemCornerRadius: 24,
+        curve: Curves.easeIn,
+        onItemSelected: (index) => {
+          setState(() => _currentIndex = index),
+          _pageController.jumpToPage(index)
         },
+        items: <BottomNavyBarItem>[
+          BottomNavyBarItem(
+            icon: Icon(Icons.messenger),
+            title: Text('Chats'),
+            activeColor: Colors.pink,
+            textAlign: TextAlign.center,
+          ),
+          BottomNavyBarItem(
+            icon: Icon(Icons.notifications),
+            title: Text('notifications'),
+            activeColor: Colors.purpleAccent,
+            textAlign: TextAlign.center,
+          ),
+          BottomNavyBarItem(
+            icon: Icon(Icons.add),
+            title: Text(
+              'Attendance',
+            ),
+            activeColor: Colors.pink,
+            textAlign: TextAlign.center,
+          ),
+          BottomNavyBarItem(
+            icon: Icon(Icons.person_rounded),
+            title: Text('Profile'),
+            activeColor: Colors.blue,
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 }
-*/
