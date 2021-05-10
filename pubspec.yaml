@@ -14,10 +14,12 @@ dependencies:
   firebase_core: "0.5.0"
   firebase_storage: ^4.0.1
   cloud_firestore: ^0.14.0+2
-  firebase_messaging: ^6.0.13
+  firebase_messaging: ^6.0.16
   flutter_spinkit: ^4.1.2+1
+  cached_network_image: ^2.0.0
   flutter:
     sdk: flutter
+
 
 
   cupertino_icons: ^1.0.2
@@ -26,6 +28,9 @@ dependencies:
   local_auth: ^0.6.1
   bottom_navy_bar: ^5.6.0
   shared_preferences: ^0.5.12+4
+  http:
+
+
 
 dev_dependencies:
   flutter_test:

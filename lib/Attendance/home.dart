@@ -20,26 +20,33 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final db = FirebaseFirestore.instance;
-  double _height, _width;
+  String username;
   SharedPreferences prefs;
   bool _load = false;
-  String _uid, _role;
+  String role;
   double windowWidth = 0;
   double windowHeight = 0;
-  var username;
   var department;
   var rollno;
   TextEditingController courses = new TextEditingController();
+
+  Stream attendanceStream;
+
   @override
   void initState() {
+    getdata(username).then((result) {
+      setState(() {
+        attendanceStream = result;
+      });
+    });
     super.initState();
     try {
       SharedPreferences.getInstance().then((sharedPrefs) {
         setState(() {
           prefs = sharedPrefs;
-          _uid = prefs.getString('Username');
-          _role = prefs.getString('Role');
+          username = prefs.getString('Username');
+          role = prefs.getString('Role');
+          print(role);
         });
       });
     } catch (e) {
@@ -48,74 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  getdata(String username) async {
+    return await FirebaseFirestore.instance
+        .collection("Courses")
+        .where("Faculty", isEqualTo: username)
+        .snapshots();
+  }
+
   @override
   Widget build(BuildContext context) {
-    _height = MediaQuery.of(context).size.height;
-    _width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: !_load
-          ? checkRole()
-          : Center(
-              child: CircularProgressIndicator(),
-            ),
-    );
-  }
-
-  @override
-  Widget checkRole() {
-    switch (_role) {
-      case 'Faculty':
-        return listViewAdmin();
-        break;
-      default:
-        return Center(
-          child: Text('Not a valid user role'),
-        );
-    }
-  }
-
-  /* Widget listViewStudents() {
-    try {
-      return new StreamBuilder(
-        stream: Firestore.instance
-            .collection('Courses')
-            .where('students', arrayContains: _uid)
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData)
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          return new ListView(
-            children: snapshot.data.documents.map((document) {
-              return new Card(
-                child: ListTile(
-                  title: new Text(document.documentID),
-                  subtitle: new Text(document['name']),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                ViewAttendanceStud(
-                                  code: document.documentID,
-                                  uid: _uid,
-                                )));
-                  },
-                ),
-              );
-            }).toList(),
-          );
-        },
-      );
-    } catch (e) {
-      print(e.message);
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      return Center(child: Text(e.message));
-    }
-  }*/
-
-  Widget listViewAdmin() {
     windowHeight = MediaQuery.of(context).size.height;
     windowWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -256,78 +204,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               topRight: Radius.circular(40),
                               bottomLeft: Radius.circular(40),
                               bottomRight: Radius.circular(40))),
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: db
-                            .collection('Courses')
-                            .where('Faculty', isEqualTo: username)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                backgroundColor: Colors.white70,
-                              ),
-                            );
-                          } else
-                            return ListView(
+                      child: StreamBuilder(
+                          stream: attendanceStream,
+                          builder: (context, snapshot) {
+                            return ListView.builder(
                               padding: EdgeInsets.all(10.0),
-                              children: snapshot.data.docs.map((doc) {
-                                return Card(
-                                    color: Colors.white70,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    child: ListTile(
-                                      title: Text(
-                                        doc.data()['Courses_name'],
-                                        style: TextStyle(fontSize: 25),
-                                      ),
-                                      onTap: () {
-                                        setState(() async {
-                                          final QuerySnapshot result =
-                                              await Firestore.instance
-                                                  .collection('Users')
-                                                  .where('Role',
-                                                      isEqualTo: 'Students')
-                                                  .where('Department',
-                                                      isEqualTo:
-                                                          department.toString())
-                                                  .getDocuments();
-                                          final List<DocumentSnapshot>
-                                              documents = result.documents;
-                                          setState(
-                                            () {
-                                              result.documents
-                                                  .forEach((document) {
-                                                rollno = document['Rollno']
-                                                    .toString();
-                                              });
-                                              if (documents.length > 0) {
-                                                print(
-                                                    doc.data()['Courses_name']);
-                                                print(rollno);
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            MarkAttendance(
-                                                                course: doc
-                                                                        .data()[
-                                                                    'Courses_name'],
-                                                                students:
-                                                                    rollno)));
-                                              }
-                                            },
-                                          );
-                                        });
-                                      },
-                                    ));
-                              }).toList(),
+                              itemCount: snapshot.data.documents.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                var data = snapshot.data.documents[index];
+                                return Courses(
+                                  Subject: data['Courses_name'],
+                                );
+                              },
                             );
-                        },
-                      ),
-                    ),
+                          }),
+                    )
                   ],
                 ),
               ),
@@ -365,4 +257,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
   }*/
+}
+
+class Courses extends StatelessWidget {
+  String Subject;
+
+  Courses({@required this.Subject});
+
+  @override
+  Widget build(BuildContext context) {}
 }

@@ -1,8 +1,10 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:classinterim/Chats/Chatmain.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'Notices.dart';
 import 'ProfilePage.dart';
 
 class SBottomNavigation extends StatefulWidget {
@@ -42,7 +44,9 @@ class bottomnavigation extends State<SBottomNavigation> {
             Container(
               child: chatmain(),
             ),
-            Container(),
+            Container(
+              child: Notice(),
+            ),
             Container(),
             Container(
               child: SProfilePage(),

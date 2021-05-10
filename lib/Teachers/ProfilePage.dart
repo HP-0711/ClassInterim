@@ -29,13 +29,9 @@ class MapScreenState extends State<ProfilePage>
   TextEditingController password = new TextEditingController();
   TextEditingController email = new TextEditingController();
 
-  retrivedata(String user) async {
+  retrivedata(String user) {
     if (user != null)
-      await Firestore.instance
-          .collection('Users')
-          .document(user)
-          .get()
-          .then((ds) {
+      Firestore.instance.collection('Users').document(user).get().then((ds) {
         var data = ds.data();
         _username = data['Username'];
         _email = data['Email'];
@@ -73,11 +69,9 @@ class MapScreenState extends State<ProfilePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: FutureBuilder(
-            future: retrivedata(user),
+        body: StreamBuilder(
+            stream: retrivedata(user),
             builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done)
-                return Text("Loading data");
               return new ListView(
                 children: <Widget>[
                   Column(
@@ -240,6 +234,9 @@ class MapScreenState extends State<ProfilePage>
                                             hintText: 'Enter Username',
                                           ),
                                           controller: username,
+                                          onChanged: (username) {
+                                            _username = username;
+                                          },
                                           enabled: !_status,
                                           autofocus: !_status,
                                         ),
@@ -278,7 +275,9 @@ class MapScreenState extends State<ProfilePage>
                                           decoration: const InputDecoration(
                                               hintText: "Enter Email ID"),
                                           controller: email,
-                                          onChanged: (email) {},
+                                          onChanged: (email) {
+                                            _email = email;
+                                          },
                                           enabled: !_status,
                                         ),
                                       ),
@@ -317,6 +316,9 @@ class MapScreenState extends State<ProfilePage>
                                             hintText: "Enter Password",
                                           ),
                                           controller: password,
+                                          onChanged: (password) {
+                                            _password = password;
+                                          },
                                           enabled: !_status,
                                         ),
                                       ),
@@ -367,6 +369,9 @@ class MapScreenState extends State<ProfilePage>
                                             decoration: const InputDecoration(
                                                 hintText: "Enter Role"),
                                             controller: role,
+                                            onChanged: (role) {
+                                              _role = role;
+                                            },
                                             enabled: !_status,
                                           ),
                                         ),
@@ -377,6 +382,9 @@ class MapScreenState extends State<ProfilePage>
                                           decoration: const InputDecoration(
                                               hintText: "Enter Department"),
                                           controller: department,
+                                          onChanged: (department) {
+                                            _department = department;
+                                          },
                                           enabled: !_status,
                                         ),
                                         flex: 2,
@@ -397,7 +405,6 @@ class MapScreenState extends State<ProfilePage>
 
   @override
   void dispose() {
-    // Clean up the controller when the Widget is disposed
     myFocusNode.dispose();
     super.dispose();
   }
@@ -419,6 +426,16 @@ class MapScreenState extends State<ProfilePage>
                 color: Colors.green,
                 onPressed: () {
                   setState(() {
+                    Firestore.instance
+                        .collection('Users')
+                        .document(user)
+                        .updateData({
+                      "Username": username.text,
+                      "Email": email.text,
+                      "Password": password.text,
+                      "Role": role.text,
+                      "Department": department.text
+                    });
                     _status = true;
                     FocusScope.of(context).requestFocus(new FocusNode());
                   });
