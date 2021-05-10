@@ -29,16 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   var department;
   var rollno;
   TextEditingController courses = new TextEditingController();
-
-  Stream attendanceStream;
-
   @override
   void initState() {
-    getdata(username).then((result) {
-      setState(() {
-        attendanceStream = result;
-      });
-    });
     super.initState();
     try {
       SharedPreferences.getInstance().then((sharedPrefs) {
@@ -205,12 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               bottomLeft: Radius.circular(40),
                               bottomRight: Radius.circular(40))),
                       child: StreamBuilder(
-                          stream: attendanceStream,
+                          stream: getdata(username),
                           builder: (context, snapshot) {
                             return ListView.builder(
                               padding: EdgeInsets.all(10.0),
-                              itemCount: snapshot.data.documents.length,
-                              shrinkWrap: true,
                               itemBuilder: (context, index) {
                                 var data = snapshot.data.documents[index];
                                 return Courses(
