@@ -48,7 +48,7 @@ class _TweetContainerState extends State<TweetContainer> {
               default:
                 return ListView(
                   children:
-                  snapshot.data.documents.map((DocumentSnapshot document) {
+                      snapshot.data.documents.map((DocumentSnapshot document) {
                     return NoticeContainer(
                       image: document['image'],
                       text: document['text'],

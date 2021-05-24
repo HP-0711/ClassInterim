@@ -64,7 +64,7 @@ class _OverallAttendanceState extends State<OverallAttendance> {
               default:
                 return ListView(
                   children:
-                  snapshot.data.documents.map((DocumentSnapshot document) {
+                      snapshot.data.documents.map((DocumentSnapshot document) {
                     return OverallAttendanceCard(
                       date: date,
                       Rollno: document["Rollno"],

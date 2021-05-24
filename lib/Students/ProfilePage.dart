@@ -27,6 +27,10 @@ class MapScreenState extends State<SProfilePage>
   String _role;
   String _department;
   String _password;
+  String _rollno;
+  String _enrollmentno;
+  String _scheme;
+  String _year;
   File _pickedImage;
   String profileimage;
 
@@ -35,6 +39,10 @@ class MapScreenState extends State<SProfilePage>
   TextEditingController department = new TextEditingController();
   TextEditingController password = new TextEditingController();
   TextEditingController email = new TextEditingController();
+  TextEditingController rollno = new TextEditingController();
+  TextEditingController enrollmentno = new TextEditingController();
+  TextEditingController year = new TextEditingController();
+  TextEditingController scheme = new TextEditingController();
 
   retrivedata(String user) {
     if (user != null)
@@ -45,6 +53,10 @@ class MapScreenState extends State<SProfilePage>
         _password = data['Password'];
         _role = data['Role'];
         _department = data['Department'];
+        _rollno = data['Rollno'];
+        _enrollmentno = data['Enrollmentno'];
+        _year = data['Year'];
+        _scheme = data['Scheme'];
         profileimage = data['profile_image'];
         print(_username);
         print(_email);
@@ -56,6 +68,10 @@ class MapScreenState extends State<SProfilePage>
     password.text = _password;
     role.text = _role;
     department.text = _department;
+    scheme.text = _scheme;
+    year.text = _year;
+    rollno.text = _rollno;
+    enrollmentno.text = _enrollmentno;
   }
 
   @override
@@ -91,7 +107,10 @@ class MapScreenState extends State<SProfilePage>
         FirebaseStorage.instance.ref().child(fileName);
     StorageUploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-    imageurl = await taskSnapshot.ref.getDownloadURL();
+    String image = await taskSnapshot.ref.getDownloadURL();
+    setState(() {
+      imageurl = image;
+    });
     print(imageurl);
   }
 
@@ -156,30 +175,30 @@ class MapScreenState extends State<SProfilePage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     _pickedImage == null
-                                        ? profileimage == null
-                                            ? new Container(
-                                                width: 140.0,
-                                                height: 140.0,
-                                                decoration: new BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: new DecorationImage(
-                                                    image: NetworkImage(
-                                                        'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ))
-                                            : new Container(
-                                                width: 140.0,
-                                                height: 140.0,
-                                                decoration: new BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: new DecorationImage(
-                                                    image: NetworkImage(
-                                                        profileimage),
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ))
+                                        ? new Container(
+                                            width: 140.0,
+                                            height: 140.0,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                image: NetworkImage(
+                                                    'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ))
                                         : new Container(
+                                            width: 140.0,
+                                            height: 140.0,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                image:
+                                                    NetworkImage(profileimage),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )),
+                                    profileimage == null || profileimage == ''
+                                        ? new Container(
                                             width: 140.0,
                                             height: 140.0,
                                             decoration: new BoxDecoration(
@@ -189,6 +208,17 @@ class MapScreenState extends State<SProfilePage>
                                                 fit: BoxFit.cover,
                                               ),
                                             ))
+                                        : new Container(
+                                            width: 140.0,
+                                            height: 140.0,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                image:
+                                                    NetworkImage(profileimage),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )),
                                   ],
                                 ),
                                 GestureDetector(
@@ -463,6 +493,150 @@ class MapScreenState extends State<SProfilePage>
                                       ),
                                     ],
                                   )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 25.0, right: 25.0, top: 25.0),
+                                  child: new Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Container(
+                                          child: new Text(
+                                            'Year',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          child: new Text(
+                                            'Scheme',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                    ],
+                                  )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 25.0, right: 25.0, top: 2.0),
+                                  child: new Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Flexible(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(right: 10.0),
+                                          child: new TextField(
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                            decoration: const InputDecoration(
+                                                hintText: "Enter Year"),
+                                            controller: year,
+                                            onChanged: (year) {
+                                              _year = year;
+                                            },
+                                            enabled: !_status,
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                      Flexible(
+                                        child: new TextField(
+                                          style: TextStyle(color: Colors.white),
+                                          decoration: const InputDecoration(
+                                              hintText: "Enter Scheme"),
+                                          controller: scheme,
+                                          onChanged: (scheme) {
+                                            _scheme = scheme;
+                                          },
+                                          enabled: !_status,
+                                        ),
+                                        flex: 2,
+                                      ),
+                                    ],
+                                  )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 25.0, right: 25.0, top: 25.0),
+                                  child: new Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Container(
+                                          child: new Text(
+                                            'Rollno',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          child: new Text(
+                                            'Enrollment No',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                    ],
+                                  )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 25.0, right: 25.0, top: 2.0),
+                                  child: new Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Flexible(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(right: 10.0),
+                                          child: new TextField(
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                            decoration: const InputDecoration(
+                                                hintText: "Enter Rollno"),
+                                            controller: rollno,
+                                            onChanged: (rollno) {
+                                              _rollno = rollno;
+                                            },
+                                            enabled: !_status,
+                                          ),
+                                        ),
+                                        flex: 2,
+                                      ),
+                                      Flexible(
+                                        child: new TextField(
+                                          style: TextStyle(color: Colors.white),
+                                          decoration: const InputDecoration(
+                                              hintText: "Enter Enrollment no"),
+                                          controller: enrollmentno,
+                                          onChanged: (enrollmentno) {
+                                            enrollmentno = _enrollmentno;
+                                          },
+                                          enabled: !_status,
+                                        ),
+                                        flex: 2,
+                                      ),
+                                    ],
+                                  )),
                               !_status ? _getActionButtons() : new Container(),
                             ],
                           ),
@@ -508,6 +682,10 @@ class MapScreenState extends State<SProfilePage>
                       "Password": password.text,
                       "Role": role.text,
                       "Department": department.text,
+                      "Year": year.text,
+                      "Scheme": scheme.text,
+                      "Rollno": rollno.text,
+                      "Enrollmentno": enrollmentno.text,
                       "profile_image": imageurl.toString()
                     });
                     _status = true;
