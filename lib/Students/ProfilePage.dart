@@ -1,12 +1,13 @@
 import 'dart:io';
+
 import 'package:classinterim/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SProfilePage extends StatefulWidget {
   @override
@@ -27,6 +28,7 @@ class MapScreenState extends State<SProfilePage>
   String _department;
   String _password;
   File _pickedImage;
+  String profileimage;
 
   TextEditingController username = new TextEditingController();
   TextEditingController role = new TextEditingController();
@@ -43,6 +45,7 @@ class MapScreenState extends State<SProfilePage>
         _password = data['Password'];
         _role = data['Role'];
         _department = data['Department'];
+        profileimage = data['profile_image'];
         print(_username);
         print(_email);
       }).catchError((e) {
@@ -89,7 +92,7 @@ class MapScreenState extends State<SProfilePage>
     StorageUploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     imageurl = await taskSnapshot.ref.getDownloadURL();
-    SharedPreferences preferences = await SharedPreferences.getInstance();
+    print(imageurl);
   }
 
   @override
@@ -153,17 +156,29 @@ class MapScreenState extends State<SProfilePage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     _pickedImage == null
-                                        ? new Container(
-                                            width: 140.0,
-                                            height: 140.0,
-                                            decoration: new BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: new DecorationImage(
-                                                image: NetworkImage(
-                                                    'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ))
+                                        ? profileimage == null
+                                            ? new Container(
+                                                width: 140.0,
+                                                height: 140.0,
+                                                decoration: new BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: new DecorationImage(
+                                                    image: NetworkImage(
+                                                        'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ))
+                                            : new Container(
+                                                width: 140.0,
+                                                height: 140.0,
+                                                decoration: new BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: new DecorationImage(
+                                                    image: NetworkImage(
+                                                        profileimage),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ))
                                         : new Container(
                                             width: 140.0,
                                             height: 140.0,

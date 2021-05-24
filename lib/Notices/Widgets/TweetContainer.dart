@@ -21,6 +21,7 @@ class _TweetContainerState extends State<TweetContainer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0XFF252331),
       body: StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance.collection("Notices").snapshots(),
           builder:
@@ -47,7 +48,7 @@ class _TweetContainerState extends State<TweetContainer> {
               default:
                 return ListView(
                   children:
-                      snapshot.data.documents.map((DocumentSnapshot document) {
+                  snapshot.data.documents.map((DocumentSnapshot document) {
                     return NoticeContainer(
                       image: document['image'],
                       text: document['text'],

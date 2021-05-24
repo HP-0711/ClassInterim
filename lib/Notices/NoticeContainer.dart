@@ -28,18 +28,16 @@ class _NoticeContainer extends State<NoticeContainer> {
               Text(
                 "${widget.Uploadedby}",
                 style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white70),
               ),
             ],
           ),
           SizedBox(height: 15),
           Text(
             "${widget.text}",
-            style: TextStyle(
-              fontSize: 21,
-            ),
+            style: TextStyle(fontSize: 21, color: Colors.white),
           ),
           "${widget.image}" == ""
               ? SizedBox(

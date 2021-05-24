@@ -2,6 +2,7 @@ import 'package:classinterim/Students/Attendance/AppBar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'OverAllAttendanceCard.dart';
 
 class VOverallAttendance extends StatefulWidget {
@@ -39,6 +40,7 @@ class _OverallAttendanceState extends State<VOverallAttendance> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0XFF252331),
         appBar: SCommonAppBar(
           title: "View Attendance",
         ),

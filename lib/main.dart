@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:classinterim/Teachers/bottomNavigationbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'Models/Data_Model.dart';
 import 'Students/bottomNavigationbar.dart';
 
@@ -386,33 +387,30 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Column(
                   children: <Widget>[
-                    /* Container(
-                    margin: EdgeInsets.only(bottom: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border:
-                              Border.all(color: Color(0xFFB40284A), width: 2),
-                          borderRadius: BorderRadius.circular(50)),
-                      padding: EdgeInsets.all(10),
-                      child: Center(
-                        child: FlatButton(
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.fingerprint,
-                                size: 40,
-                              ),
-                              Text(
-                                "   Login with Fingerprint",
-                                style: TextStyle(
-                                    color: Color(0xFFB40284A), fontSize: 16),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ), */
+                    // GestureDetector(
+                    //     child: Container(
+                    //   margin: EdgeInsets.only(bottom: 20),
+                    //   child: Container(
+                    //     decoration: BoxDecoration(
+                    //         border:
+                    //             Border.all(color: Color(0xFFB40284A), width: 2),
+                    //         borderRadius: BorderRadius.circular(50)),
+                    //     padding: EdgeInsets.all(10),
+                    //     child: Row(
+                    //       children: <Widget>[
+                    //         Icon(
+                    //           Icons.fingerprint,
+                    //           size: 40,
+                    //         ),
+                    //         Text(
+                    //           "   Login with Fingerprint",
+                    //           style: TextStyle(
+                    //               color: Color(0xFFB40284A), fontSize: 16),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // )),
                     GestureDetector(
                       onTap: () {
                         setState(() async {

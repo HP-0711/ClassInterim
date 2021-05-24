@@ -33,6 +33,7 @@ class _OverallAttendanceState extends State<OverallAttendance> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0XFF252331),
       body: StreamBuilder<QuerySnapshot>(
           stream: Firestore.instance
               .collection("Users")
@@ -63,7 +64,7 @@ class _OverallAttendanceState extends State<OverallAttendance> {
               default:
                 return ListView(
                   children:
-                      snapshot.data.documents.map((DocumentSnapshot document) {
+                  snapshot.data.documents.map((DocumentSnapshot document) {
                     return OverallAttendanceCard(
                       date: date,
                       Rollno: document["Rollno"],

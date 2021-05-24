@@ -20,7 +20,7 @@ class CommonAppBar extends StatelessWidget with PreferredSizeWidget {
       leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black87,
+            color: Colors.white70,
             size: 21,
           ),
           onPressed: () {
@@ -30,12 +30,12 @@ class CommonAppBar extends StatelessWidget with PreferredSizeWidget {
       title: Text(
         "${title}",
         style: TextStyle(
-          color: Colors.black,
+          color: Colors.white70,
           fontWeight: FontWeight.bold,
         ),
       ),
       centerTitle: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Color(0XFF1e1c26),
       elevation: 0.0,
     );
   }

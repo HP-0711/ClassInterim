@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VOverallAttendanceCard extends StatefulWidget {
@@ -77,7 +75,7 @@ class _OverallAttendanceCardState extends State<VOverallAttendanceCard>
                 horizontal: 20,
               ),
               decoration: BoxDecoration(
-                color: Colors.white70,
+                color: Colors.white54,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black26,

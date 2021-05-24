@@ -20,7 +20,7 @@ class _HomeScreenState extends State<Notices> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Color(0XFF1e1c26),
           elevation: 0.5,
           centerTitle: true,
           leading: Container(
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<Notices> {
           title: Text(
             'Notices',
             style: TextStyle(
-              color: Color(0XFF252331),
+              color: Colors.white70,
             ),
           ),
         ),

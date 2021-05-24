@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     windowWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
-        color: Colors.indigo,
+        color: Colors.white,
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 //curve: Curves.fastLinearToSlowEaseIn,
                 transform: Matrix4.translationValues(0, 91, 1),
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0XFF252331),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(40),
                         topRight: Radius.circular(40),
@@ -78,8 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         "Subjects",
                         style: TextStyle(
-                            fontSize: 21,
-                            color: Colors.indigo,
+                            fontSize: 41,
+                            color: Colors.white70,
                             fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       //color: Colors.indigo,
                       transform: Matrix4.translationValues(0, 21, 2),
                       decoration: BoxDecoration(
-                          color: Colors.indigo[300],
+                          color: Colors.indigo[500],
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(50),
                               topRight: Radius.circular(50),
@@ -173,7 +173,7 @@ class Courses extends StatelessWidget {
                 padding: EdgeInsets.all(8),
                 margin: EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                    color: Colors.white54,
+                    color: Colors.white60,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(50),
                         topRight: Radius.circular(50),
