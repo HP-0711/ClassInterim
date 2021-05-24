@@ -1,13 +1,10 @@
 import 'package:classinterim/Chats/helper/constants.dart';
 import 'package:classinterim/Chats/helper/consts.dart';
-import 'package:classinterim/Chats/helper/theme.dart';
 import 'package:classinterim/Chats/services/database.dart';
 import 'package:classinterim/Chats/views/chat.dart';
 import 'package:classinterim/Chats/views/search.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../main.dart';
 
 class ChatRoom extends StatefulWidget {
   @override

@@ -1,7 +1,6 @@
-import 'package:classinterim/Attendance/MarkAttendance.dart';
-import 'package:classinterim/Attendance/ViewAttendanceAll.dart';
+import 'package:classinterim/Attendance/Screen/Attendance.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,37 +20,27 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String username;
-  SharedPreferences prefs;
+  String department;
   bool _load = false;
   String role;
   double windowWidth = 0;
   double windowHeight = 0;
-  var department;
-  var rollno;
+
   TextEditingController courses = new TextEditingController();
   @override
   void initState() {
+    fetchdata();
     super.initState();
-    try {
-      SharedPreferences.getInstance().then((sharedPrefs) {
-        setState(() {
-          prefs = sharedPrefs;
-          username = prefs.getString('Username');
-          role = prefs.getString('Role');
-          print(role);
-        });
-      });
-    } catch (e) {
-      print(e.message);
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-    }
   }
 
-  getdata(String username) async {
-    return await FirebaseFirestore.instance
-        .collection("Courses")
-        .where("Faculty", isEqualTo: username)
-        .snapshots();
+  fetchdata() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      username = preferences.getString("Username");
+      print(username);
+      department = preferences.getString("Department");
+      print(department);
+    });
   }
 
   @override
@@ -124,15 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         GestureDetector(
                           onTap: () {
                             setState(() async {
-                              SharedPreferences preferences =
-                                  await SharedPreferences.getInstance();
-                              username = preferences.getString("Username");
                               final QuerySnapshot result = await Firestore
                                   .instance
                                   .collection('Courses')
                                   .where('Courses_name',
                                       isEqualTo: courses.text)
-                                  .where('Faculty', isEqualTo: username)
                                   .getDocuments();
 
                               final List<DocumentSnapshot> documents =
@@ -145,10 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               } else {
                                 Firestore.instance
                                     .collection('Courses')
-                                    .document()
-                                    .setData({
+                                    .document(courses.text)
+                                    .set({
                                   'Courses_name': courses.text,
                                   'Faculty': username,
+                                  'Department': department
                                 });
                                 final snackBar = SnackBar(
                                     content:
@@ -186,28 +172,53 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: EdgeInsets.only(top: 9, bottom: 9),
                       width: 500,
-                      height: 300,
+                      height: 350,
                       //color: Colors.indigo,
                       transform: Matrix4.translationValues(0, 21, 2),
                       decoration: BoxDecoration(
                           color: Colors.indigo[300],
                           borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(40),
-                              topRight: Radius.circular(40),
-                              bottomLeft: Radius.circular(40),
-                              bottomRight: Radius.circular(40))),
-                      child: StreamBuilder(
-                          stream: getdata(username),
-                          builder: (context, snapshot) {
-                            return ListView.builder(
-                              padding: EdgeInsets.all(10.0),
-                              itemBuilder: (context, index) {
-                                var data = snapshot.data.documents[index];
-                                return Courses(
-                                  Subject: data['Courses_name'],
+                              topLeft: Radius.circular(50),
+                              topRight: Radius.circular(50),
+                              bottomLeft: Radius.circular(50),
+                              bottomRight: Radius.circular(50))),
+                      child: StreamBuilder<QuerySnapshot>(
+                          stream: Firestore.instance
+                              .collection('Courses')
+                              .where('Faculty', isEqualTo: username)
+                              .where("Department", isEqualTo: department)
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError)
+                              return new Text('Error: ${snapshot.error}');
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      Text(
+                                        "Connecting to Cloud ...",
+                                        style: TextStyle(
+                                            fontSize: 25,
+                                            fontStyle: FontStyle.italic,
+                                            height: 2,
+                                            fontWeight: FontWeight.w800),
+                                      ),
+                                    ],
+                                  ),
                                 );
-                              },
-                            );
+                              default:
+                                return ListView(
+                                  children: snapshot.data.documents
+                                      .map((DocumentSnapshot document) {
+                                    return Courses(
+                                        Subject: document["Courses_name"]);
+                                  }).toList(),
+                                );
+                            }
                           }),
                     )
                   ],
@@ -219,41 +230,42 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  /*Widget button(String course, List students) {
-    return RaisedButton(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-      onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) =>
-                    MarkAttendance(course: course, students: students)));
-      },
-      textColor: Colors.white,
-      padding: EdgeInsets.all(0.0),
-      child: Container(
-        alignment: Alignment.center,
-        width: _width / 2,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20.0)),
-          gradient: LinearGradient(
-            colors: <Color>[Colors.orange[200], Colors.pinkAccent],
-          ),
-        ),
-        padding: const EdgeInsets.all(12.0),
-      ),
-    );
-
-  }*/
 }
 
+// ignore: must_be_immutable
 class Courses extends StatelessWidget {
+  // ignore: non_constant_identifier_names
   String Subject;
 
+  // ignore: non_constant_identifier_names
   Courses({@required this.Subject});
 
   @override
-  Widget build(BuildContext context) {}
+  Widget build(BuildContext context) {
+    return Container(
+        child: GestureDetector(
+            onTap: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.setString("Subject", Subject);
+              print(Subject);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Attendance()));
+            },
+            child: Container(
+                padding: EdgeInsets.all(8),
+                margin: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                    color: Colors.white54,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        topRight: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                        bottomRight: Radius.circular(50))),
+                child: Row(children: [
+                  Text(
+                    Subject,
+                    style: TextStyle(fontSize: 25),
+                  ),
+                ]))));
+  }
 }

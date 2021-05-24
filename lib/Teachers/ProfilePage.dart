@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:classinterim/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -16,12 +20,13 @@ class MapScreenState extends State<ProfilePage>
   final FocusNode myFocusNode = FocusNode();
   String user;
   String r;
-
+  String imageurl;
   String _username;
   String _email;
   String _role;
   String _department;
   String _password;
+  File _pickedImage;
 
   TextEditingController username = new TextEditingController();
   TextEditingController role = new TextEditingController();
@@ -50,8 +55,6 @@ class MapScreenState extends State<ProfilePage>
     department.text = _department;
   }
 
-  //
-
   @override
   void initState() {
     fetchdata();
@@ -60,15 +63,39 @@ class MapScreenState extends State<ProfilePage>
 
   void fetchdata() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    user = preferences.getString("Username");
-    r = preferences.getString("Role");
-    //print(user);
-    //print(r);
+    setState(() {
+      user = preferences.getString("Username");
+      r = preferences.getString("Role");
+    });
+  }
+
+  handleImageFromGallery() async {
+    try {
+      File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+      if (imageFile != null) {
+        setState(() {
+          _pickedImage = imageFile;
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future uploadPic(File imageFile) async {
+    String fileName = basename(imageFile.path);
+    StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    imageurl = await taskSnapshot.ref.getDownloadURL();
+    SharedPreferences preferences = await SharedPreferences.getInstance();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0XFF252331),
         body: StreamBuilder(
             stream: retrivedata(user),
             builder: (context, snapshot) {
@@ -78,7 +105,6 @@ class MapScreenState extends State<ProfilePage>
                     children: <Widget>[
                       new Container(
                         height: 250.0,
-                        color: Colors.white,
                         child: new Column(
                           children: <Widget>[
                             Padding(
@@ -93,14 +119,14 @@ class MapScreenState extends State<ProfilePage>
                                               fontWeight: FontWeight.bold,
                                               fontSize: 21.0,
                                               fontFamily: 'sans-serif-light',
-                                              color: Colors.black)),
+                                              color: Colors.white)),
                                     ),
                                     GestureDetector(
-                                      onTap: () {
-                                        setState(() async {
-                                          SharedPreferences preferences =
-                                              await SharedPreferences
-                                                  .getInstance();
+                                      onTap: () async {
+                                        SharedPreferences preferences =
+                                            await SharedPreferences
+                                                .getInstance();
+                                        setState(() {
                                           preferences.clear();
                                           Navigator.pushReplacement(
                                               context,
@@ -111,42 +137,61 @@ class MapScreenState extends State<ProfilePage>
                                       },
                                       child: FlatButton(
                                           padding: EdgeInsets.only(left: 251.0),
-                                          child: new Icon(Icons.logout)),
+                                          child: new Icon(
+                                            Icons.logout,
+                                            color: Colors.white,
+                                          )),
                                     ),
                                   ],
                                 )),
                             Padding(
                               padding: EdgeInsets.only(top: 20.0),
-                              child: new Stack(
-                                  fit: StackFit.loose,
+                              child: new Stack(fit: StackFit.loose, children: <
+                                  Widget>[
+                                new Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    new Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        new Container(
+                                    _pickedImage == null
+                                        ? new Container(
                                             width: 140.0,
                                             height: 140.0,
                                             decoration: new BoxDecoration(
                                               shape: BoxShape.circle,
-                                              /*image: new DecorationImage(
-                                    image: new ExactAssetImage(''),
-                                    fit: BoxFit.cover,
-                                  ),*/
-                                            )),
-                                      ],
-                                    ),
-                                    Padding(
+                                              image: new DecorationImage(
+                                                image: NetworkImage(
+                                                    'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ))
+                                        : new Container(
+                                            width: 140.0,
+                                            height: 140.0,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                image: FileImage(_pickedImage),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ))
+                                  ],
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        handleImageFromGallery();
+                                      });
+                                    },
+                                    child: Padding(
                                         padding: EdgeInsets.only(
-                                            top: 90.0, right: 100.0),
+                                            top: 110.0, left: 70.0),
                                         child: new Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: <Widget>[
                                             new CircleAvatar(
-                                              backgroundColor: Colors.red,
+                                              backgroundColor:
+                                                  Colors.blueAccent,
                                               radius: 25.0,
                                               child: new Icon(
                                                 Icons.camera_alt,
@@ -154,14 +199,13 @@ class MapScreenState extends State<ProfilePage>
                                               ),
                                             )
                                           ],
-                                        )),
-                                  ]),
+                                        ))),
+                              ]),
                             )
                           ],
                         ),
                       ),
                       new Container(
-                        color: Color(0xffFFFFFF),
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 25.0),
                           child: new Column(
@@ -185,7 +229,8 @@ class MapScreenState extends State<ProfilePage>
                                             'Personal Information',
                                             style: TextStyle(
                                                 fontSize: 18.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -216,7 +261,8 @@ class MapScreenState extends State<ProfilePage>
                                             'Username',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -230,6 +276,7 @@ class MapScreenState extends State<ProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                             hintText: 'Enter Username',
                                           ),
@@ -257,8 +304,10 @@ class MapScreenState extends State<ProfilePage>
                                           new Text(
                                             'Email ID',
                                             style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -272,6 +321,7 @@ class MapScreenState extends State<ProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                               hintText: "Enter Email ID"),
                                           controller: email,
@@ -298,7 +348,8 @@ class MapScreenState extends State<ProfilePage>
                                             'Password',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -312,6 +363,7 @@ class MapScreenState extends State<ProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                             hintText: "Enter Password",
                                           ),
@@ -337,7 +389,8 @@ class MapScreenState extends State<ProfilePage>
                                             'Role',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ),
                                         flex: 2,
@@ -348,7 +401,8 @@ class MapScreenState extends State<ProfilePage>
                                             'Department',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ),
                                         flex: 2,
@@ -366,6 +420,8 @@ class MapScreenState extends State<ProfilePage>
                                         child: Padding(
                                           padding: EdgeInsets.only(right: 10.0),
                                           child: new TextField(
+                                            style:
+                                                TextStyle(color: Colors.white),
                                             decoration: const InputDecoration(
                                                 hintText: "Enter Role"),
                                             controller: role,
@@ -379,6 +435,7 @@ class MapScreenState extends State<ProfilePage>
                                       ),
                                       Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                               hintText: "Enter Department"),
                                           controller: department,
@@ -426,6 +483,7 @@ class MapScreenState extends State<ProfilePage>
                 color: Colors.green,
                 onPressed: () {
                   setState(() {
+                    uploadPic(_pickedImage);
                     Firestore.instance
                         .collection('Users')
                         .document(user)
@@ -434,10 +492,11 @@ class MapScreenState extends State<ProfilePage>
                       "Email": email.text,
                       "Password": password.text,
                       "Role": role.text,
-                      "Department": department.text
+                      "Department": department.text,
+                      "profile_image": imageurl.toString()
                     });
                     _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                    // FocusScope.of(context).requestFocus(new FocusNode());
                   });
                 },
                 shape: new RoundedRectangleBorder(
@@ -457,7 +516,7 @@ class MapScreenState extends State<ProfilePage>
                 onPressed: () {
                   setState(() {
                     _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                    // FocusScope.of(context).requestFocus(new FocusNode());
                   });
                 },
                 shape: new RoundedRectangleBorder(
@@ -474,7 +533,7 @@ class MapScreenState extends State<ProfilePage>
   Widget _getEditIcon() {
     return new GestureDetector(
       child: new CircleAvatar(
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.blueAccent,
         radius: 14.0,
         child: new Icon(
           Icons.edit,

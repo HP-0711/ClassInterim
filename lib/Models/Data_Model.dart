@@ -35,7 +35,7 @@ List<Scheme> scheme = <Scheme>[
   const Scheme("I"),
 ];
 
-List<Department> department = <Department>[
+List<Department> departments = <Department>[
   const Department("Mechanical Engineering"),
   const Department("Chemical Engineering"),
   const Department("Computer Engineering"),

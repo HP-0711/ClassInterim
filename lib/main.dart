@@ -62,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
 
   String role;
   String depart;
+  String rollno;
   var _backgroundColor = Colors.white;
   var _headingColor = Color(0xFFB40284A);
 
@@ -375,6 +376,7 @@ class _LoginPageState extends State<LoginPage> {
                                         });
                                       })),
                               textInputAction: TextInputAction.done,
+                              obscureText: _isObscure,
                             ),
                           ),
                         ],
@@ -426,7 +428,6 @@ class _LoginPageState extends State<LoginPage> {
                               result.documents;
 
                           if (documents.length > 0) {
-                            preferences.setString("Username", username.text);
                             final snackBar =
                                 SnackBar(content: Text("Login Successful"));
                             ScaffoldMessenger.of(context)
@@ -435,11 +436,17 @@ class _LoginPageState extends State<LoginPage> {
                               result.documents.forEach((document) {
                                 role = document['Role'].toString();
                                 depart = document['Department'].toString();
-                              });
-                              preferences.setString("Role", role.toString());
-                              preferences.setString(
-                                  "Department", depart.toString());
 
+                                preferences.setString(
+                                    "Username", username.text);
+                                preferences.setString("Role", role.toString());
+                                preferences.setString(
+                                    "Department", depart.toString());
+                                if (role == "Student") {
+                                  rollno = document['Rollno'].toString();
+                                  preferences.setString("Rollno", rollno);
+                                }
+                              });
                               if (role == "Faculty") {
                                 Navigator.pushReplacement(
                                   context,
@@ -878,7 +885,7 @@ class _LoginPageState extends State<LoginPage> {
                                   selecteddepartment = value1;
                                 });
                               },
-                              items: department.map((Department user) {
+                              items: departments.map((Department user) {
                                 return DropdownMenuItem<Department>(
                                   value: user,
                                   child: Row(

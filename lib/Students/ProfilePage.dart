@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:classinterim/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart';
 
 class SProfilePage extends StatefulWidget {
   @override
@@ -16,26 +20,19 @@ class MapScreenState extends State<SProfilePage>
   final FocusNode myFocusNode = FocusNode();
   String user;
   String r;
-
+  String imageurl;
   String _username;
   String _email;
   String _role;
   String _department;
   String _password;
-  String _rollno;
-  String _enrollmentno;
-  String _scheme;
-  String _year;
+  File _pickedImage;
 
   TextEditingController username = new TextEditingController();
   TextEditingController role = new TextEditingController();
   TextEditingController department = new TextEditingController();
   TextEditingController password = new TextEditingController();
   TextEditingController email = new TextEditingController();
-  TextEditingController rollno = new TextEditingController();
-  TextEditingController enrollmentno = new TextEditingController();
-  TextEditingController year = new TextEditingController();
-  TextEditingController scheme = new TextEditingController();
 
   retrivedata(String user) {
     if (user != null)
@@ -46,10 +43,6 @@ class MapScreenState extends State<SProfilePage>
         _password = data['Password'];
         _role = data['Role'];
         _department = data['Department'];
-        _rollno = data['Rollno'];
-        _enrollmentno = data['Enrollmentno'];
-        _year = data['Year'];
-        _scheme = data['Scheme'];
         print(_username);
         print(_email);
       }).catchError((e) {
@@ -60,13 +53,7 @@ class MapScreenState extends State<SProfilePage>
     password.text = _password;
     role.text = _role;
     department.text = _department;
-    scheme.text = _scheme;
-    year.text = _year;
-    rollno.text = _rollno;
-    enrollmentno.text = _enrollmentno;
   }
-
-  //
 
   @override
   void initState() {
@@ -76,15 +63,39 @@ class MapScreenState extends State<SProfilePage>
 
   void fetchdata() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    user = preferences.getString("Username");
-    r = preferences.getString("Role");
-    //print(user);
-    //print(r);
+    setState(() {
+      user = preferences.getString("Username");
+      r = preferences.getString("Role");
+    });
+  }
+
+  handleImageFromGallery() async {
+    try {
+      File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+      if (imageFile != null) {
+        setState(() {
+          _pickedImage = imageFile;
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future uploadPic(File imageFile) async {
+    String fileName = basename(imageFile.path);
+    StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    imageurl = await taskSnapshot.ref.getDownloadURL();
+    SharedPreferences preferences = await SharedPreferences.getInstance();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color(0XFF252331),
         body: StreamBuilder(
             stream: retrivedata(user),
             builder: (context, snapshot) {
@@ -94,7 +105,6 @@ class MapScreenState extends State<SProfilePage>
                     children: <Widget>[
                       new Container(
                         height: 250.0,
-                        color: Colors.white,
                         child: new Column(
                           children: <Widget>[
                             Padding(
@@ -109,14 +119,14 @@ class MapScreenState extends State<SProfilePage>
                                               fontWeight: FontWeight.bold,
                                               fontSize: 21.0,
                                               fontFamily: 'sans-serif-light',
-                                              color: Colors.black)),
+                                              color: Colors.white)),
                                     ),
                                     GestureDetector(
-                                      onTap: () {
-                                        setState(() async {
-                                          SharedPreferences preferences =
-                                              await SharedPreferences
-                                                  .getInstance();
+                                      onTap: () async {
+                                        SharedPreferences preferences =
+                                            await SharedPreferences
+                                                .getInstance();
+                                        setState(() {
                                           preferences.clear();
                                           Navigator.pushReplacement(
                                               context,
@@ -126,23 +136,24 @@ class MapScreenState extends State<SProfilePage>
                                         });
                                       },
                                       child: FlatButton(
-                                          padding: EdgeInsets.only(left: 230),
-                                          child: new Icon(Icons.logout)),
+                                          padding: EdgeInsets.only(left: 251.0),
+                                          child: new Icon(
+                                            Icons.logout,
+                                            color: Colors.white,
+                                          )),
                                     ),
                                   ],
                                 )),
                             Padding(
                               padding: EdgeInsets.only(top: 20.0),
-                              child: new Stack(
-                                  fit: StackFit.loose,
+                              child: new Stack(fit: StackFit.loose, children: <
+                                  Widget>[
+                                new Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    new Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        new Container(
+                                    _pickedImage == null
+                                        ? new Container(
                                             width: 140.0,
                                             height: 140.0,
                                             decoration: new BoxDecoration(
@@ -152,16 +163,49 @@ class MapScreenState extends State<SProfilePage>
                                                     'https://static.vecteezy.com/system/resources/previews/000/439/863/original/vector-users-icon.jpg'),
                                                 fit: BoxFit.cover,
                                               ),
-                                            )),
-                                      ],
-                                    ),
-                                  ]),
+                                            ))
+                                        : new Container(
+                                            width: 140.0,
+                                            height: 140.0,
+                                            decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                image: FileImage(_pickedImage),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ))
+                                  ],
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        handleImageFromGallery();
+                                      });
+                                    },
+                                    child: Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 110.0, left: 70.0),
+                                        child: new Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            new CircleAvatar(
+                                              backgroundColor:
+                                                  Colors.blueAccent,
+                                              radius: 25.0,
+                                              child: new Icon(
+                                                Icons.camera_alt,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          ],
+                                        ))),
+                              ]),
                             )
                           ],
                         ),
                       ),
                       new Container(
-                        color: Color(0xffFFFFFF),
                         child: Padding(
                           padding: EdgeInsets.only(bottom: 25.0),
                           child: new Column(
@@ -185,7 +229,8 @@ class MapScreenState extends State<SProfilePage>
                                             'Personal Information',
                                             style: TextStyle(
                                                 fontSize: 18.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -216,7 +261,8 @@ class MapScreenState extends State<SProfilePage>
                                             'Username',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -230,6 +276,7 @@ class MapScreenState extends State<SProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                             hintText: 'Enter Username',
                                           ),
@@ -257,8 +304,10 @@ class MapScreenState extends State<SProfilePage>
                                           new Text(
                                             'Email ID',
                                             style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -272,6 +321,7 @@ class MapScreenState extends State<SProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                               hintText: "Enter Email ID"),
                                           controller: email,
@@ -298,7 +348,8 @@ class MapScreenState extends State<SProfilePage>
                                             'Password',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ],
                                       ),
@@ -312,6 +363,7 @@ class MapScreenState extends State<SProfilePage>
                                     children: <Widget>[
                                       new Flexible(
                                         child: TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                             hintText: "Enter Password",
                                           ),
@@ -337,7 +389,8 @@ class MapScreenState extends State<SProfilePage>
                                             'Role',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ),
                                         flex: 2,
@@ -348,7 +401,8 @@ class MapScreenState extends State<SProfilePage>
                                             'Department',
                                             style: TextStyle(
                                                 fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
                                           ),
                                         ),
                                         flex: 2,
@@ -366,6 +420,8 @@ class MapScreenState extends State<SProfilePage>
                                         child: Padding(
                                           padding: EdgeInsets.only(right: 10.0),
                                           child: new TextField(
+                                            style:
+                                                TextStyle(color: Colors.white),
                                             decoration: const InputDecoration(
                                                 hintText: "Enter Role"),
                                             controller: role,
@@ -379,145 +435,12 @@ class MapScreenState extends State<SProfilePage>
                                       ),
                                       Flexible(
                                         child: new TextField(
+                                          style: TextStyle(color: Colors.white),
                                           decoration: const InputDecoration(
                                               hintText: "Enter Department"),
                                           controller: department,
                                           onChanged: (department) {
                                             _department = department;
-                                          },
-                                          enabled: !_status,
-                                        ),
-                                        flex: 2,
-                                      ),
-                                    ],
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 25.0, right: 25.0, top: 25.0),
-                                  child: new Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Container(
-                                          child: new Text(
-                                            'Year',
-                                            style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          child: new Text(
-                                            'Scheme',
-                                            style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                    ],
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 25.0, right: 25.0, top: 2.0),
-                                  child: new Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Flexible(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(right: 10.0),
-                                          child: new TextField(
-                                            decoration: const InputDecoration(
-                                                hintText: "Enter Year"),
-                                            controller: year,
-                                            onChanged: (year) {
-                                              _year = year;
-                                            },
-                                            enabled: !_status,
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                      Flexible(
-                                        child: new TextField(
-                                          decoration: const InputDecoration(
-                                              hintText: "Enter Scheme"),
-                                          controller: scheme,
-                                          onChanged: (scheme) {
-                                            _scheme = scheme;
-                                          },
-                                          enabled: !_status,
-                                        ),
-                                        flex: 2,
-                                      ),
-                                    ],
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 25.0, right: 25.0, top: 25.0),
-                                  child: new Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Container(
-                                          child: new Text(
-                                            'Rollno',
-                                            style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          child: new Text(
-                                            'Enrollment No',
-                                            style: TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                    ],
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 25.0, right: 25.0, top: 2.0),
-                                  child: new Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Flexible(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(right: 10.0),
-                                          child: new TextField(
-                                            decoration: const InputDecoration(
-                                                hintText: "Enter Rollno"),
-                                            controller: rollno,
-                                            onChanged: (rollno) {
-                                              _rollno = rollno;
-                                            },
-                                            enabled: !_status,
-                                          ),
-                                        ),
-                                        flex: 2,
-                                      ),
-                                      Flexible(
-                                        child: new TextField(
-                                          decoration: const InputDecoration(
-                                              hintText: "Enter Enrollment no"),
-                                          controller: enrollmentno,
-                                          onChanged: (enrollmentno) {
-                                            enrollmentno = _enrollmentno;
                                           },
                                           enabled: !_status,
                                         ),
@@ -560,6 +483,7 @@ class MapScreenState extends State<SProfilePage>
                 color: Colors.green,
                 onPressed: () {
                   setState(() {
+                    uploadPic(_pickedImage);
                     Firestore.instance
                         .collection('Users')
                         .document(user)
@@ -569,13 +493,10 @@ class MapScreenState extends State<SProfilePage>
                       "Password": password.text,
                       "Role": role.text,
                       "Department": department.text,
-                      "Year": year.text,
-                      "Scheme": scheme.text,
-                      "Rollno": rollno.text,
-                      "Enrollmentno": enrollmentno.text
+                      "profile_image": imageurl.toString()
                     });
                     _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                    // FocusScope.of(context).requestFocus(new FocusNode());
                   });
                 },
                 shape: new RoundedRectangleBorder(
@@ -595,7 +516,7 @@ class MapScreenState extends State<SProfilePage>
                 onPressed: () {
                   setState(() {
                     _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                    // FocusScope.of(context).requestFocus(new FocusNode());
                   });
                 },
                 shape: new RoundedRectangleBorder(
@@ -612,7 +533,7 @@ class MapScreenState extends State<SProfilePage>
   Widget _getEditIcon() {
     return new GestureDetector(
       child: new CircleAvatar(
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.blueAccent,
         radius: 14.0,
         child: new Icon(
           Icons.edit,
